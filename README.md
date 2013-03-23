@@ -1,12 +1,12 @@
 IRC-Bot
 =======
 
-IRC-Bot uses the "jargon text" file with a markov-chain algorithm for the text-generator to 
+IRC-Bot uses the "jargon text" file, with a markov-chain algorithm for the text-generated, to 
 create auto-responses.
 
 #### set-up
 
-The my IRC-Client repo uses the sockets and threading modules, which are both in pythons 
+The IRC-Client repo uses the sockets and threading modules, which are both in pythons 
 standard library.  For the IRC-Bot I've used twisted to construct the client.  You will need to 
 have twisted installed first. 
 
@@ -16,6 +16,7 @@ If you don't have twisted already, you can:
     
 
 #### usage
+
 `cd` to IRC-Bot's directory and run:
 
     python main.py
