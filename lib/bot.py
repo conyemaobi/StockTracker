@@ -12,7 +12,7 @@ class Bot(irc.IRCClient):
 
     def connectionMade(self):
         irc.IRCClient.connectionMade(self)     
-        print 'Connected!'
+        print '\nConnected!'
 
     def connectionLost(self, reason):
         irc.IRCClient.connectionLost(self, reason)
@@ -20,7 +20,7 @@ class Bot(irc.IRCClient):
 
     def signedOn(self):
         self.join(self.factory.channel)
-        print 'Signed ON!'
+        print 'Signed On!'
 
     def joined(self, channel):
         self.channel = channel
@@ -38,6 +38,10 @@ class Bot(irc.IRCClient):
             self.username = nickname
         self.sendLine("USER %s %s %s :%s" % 
                       (self.username, hostname, servername, self.realname))
+
+    def irc_PING(self, prefix, params):
+        print 'Ping --> %s' % params
+        self.sendLine("PONG %s" % params[-1])
 
     def privmsg(self, user, channel, msg):
         user = user.split('!')[0]
