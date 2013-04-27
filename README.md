@@ -1,8 +1,8 @@
 IRC-Bot
 =======
 
-IRC-Bot uses the "jargon text" file, with a markov-chain algorithm for the text-generated, to 
-create auto-responses.
+IRC-Bot uses a markov-chain algorithm with the "jargon text" file for input.  So whenever you or someone
+else addresses IRC-Bot, there will be an auto-response created from the markov-chain text generation.
 
 #### set-up
 
