@@ -29,6 +29,15 @@ class Bot(irc.IRCClient):
     def userJoined(self, user, channel):
         print 'Better look out %s just joined %s' % (user, channel)
 
+    def userLeft(self, user, channel):
+        print '%s decided they\'ve had enough of the %s madhouse' % (user, channel)
+
+    def userQuit(self, user, quitMessage):
+        print '%s has left the building -> %s' % (user, quitMessage)
+
+    def userKicked(self, kickee, channel, kicker, message):
+        print '%s showed %s the %s door %s' % (kicker, kickee, channel, message)
+
     def register(self, nickname, hostname='foo', servername='bar'):
         self.nickname = nickname
         if self.password is not None:
