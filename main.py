@@ -3,6 +3,7 @@
 from twisted.internet import reactor
 from lib.bot import Proto4Bot
 
+# main function
 def main():
     host = raw_input('Host: ')
     while True:

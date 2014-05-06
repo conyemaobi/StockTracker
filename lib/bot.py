@@ -7,7 +7,7 @@ from twisted.words.protocols import irc
 import re
 import psycopg2
 
-conn = psycopg2.connect(database="mydb", user="awsuser", password="ae15jkd3", host="mypost.cu9wcrgzm5xp.us-east-1.rds.amazonaws.com", port="5432")
+# our connection
 cur = conn.cursor()
 print "Opened database successfully"
 
