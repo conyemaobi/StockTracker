@@ -3,8 +3,13 @@
 from twisted.internet import reactor
 from twisted.internet.protocol import ClientFactory
 from twisted.words.protocols import irc
-from bot_response import response
+#from bot_response import response
+import re
+import psycopg2
 
+conn = psycopg2.connect(database="mydb", user="awsuser", password="ae15jkd3", host="mypost.cu9wcrgzm5xp.us-east-1.rds.amazonaws.com", port="5432")
+cur = conn.cursor()
+print "Opened database successfully"
 
 class Bot(irc.IRCClient):
     nickname = raw_input('Name your bot: ')
@@ -26,18 +31,6 @@ class Bot(irc.IRCClient):
         self.channel = channel
         print 'Joined %s' % channel
 
-    def userJoined(self, user, channel):
-        print 'Better look out %s just joined %s' % (user, channel)
-
-    def userLeft(self, user, channel):
-        print '%s decided they\'ve had enough of the %s madhouse' % (user, channel)
-
-    def userQuit(self, user, quitMessage):
-        print '%s has left the building -> %s' % (user, quitMessage)
-
-    def userKicked(self, kickee, channel, kicker, message):
-        print '%s showed %s the %s door %s' % (kicker, kickee, channel, message)
-
     def register(self, nickname, hostname='foo', servername='bar'):
         self.nickname = nickname
         if self.password is not None:
@@ -55,11 +48,28 @@ class Bot(irc.IRCClient):
     def privmsg(self, user, channel, msg):
         user = user.split('!')[0]
         print '%s | %s' % (user, msg)
-        if self.nickname in msg:
-            answer = response()
-            print '%s | %s' % (self.nickname, answer)
-            self.msg(channel, answer)            
-        
+	regex = re.compile("[A-Z]+\s\(")
+	tickers = regex.findall(msg)
+	for t in tickers:
+		t = t.strip('(')
+		cur.execute("SELECT count(*) from STOCKS where stock=\'"+str(t)+"\'")
+		rows = cur.fetchall()
+		for row in rows:
+			if int(row[0]) > 0:
+				cur.execute("UPDATE STOCKS SET count = count + 1 WHERE stock =\'"+str(t)+"\'")
+				conn.commit()
+				cur.execute("UPDATE STOCKS SET last_modified = current_timestamp WHERE stock =\'"+str(t)+"\'")
+				conn.commit()
+			else:
+				cur.execute("INSERT INTO STOCKS (STOCK,COUNT,LAST_MODIFIED) VALUES (\'"+str(t)+"\',1,current_timestamp)");
+				conn.commit()
+			print "Records created successfully";
+	#conn.close()
+        #answer = response()
+	#answer = t.strip('(')
+	#print '%s | %s' % (self.nickname, answer)
+	#self.msg(channel, answer)			
+
 class Proto4Bot(ClientFactory):
 
     def __init__(self):
