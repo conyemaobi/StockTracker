@@ -46,8 +46,8 @@
 <script>
 
 var margin = {top: 20, right: 30, bottom: 30, left: 40},
-    width = 960 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
+    width = 1600 - margin.left - margin.right,
+    height = 750 - margin.top - margin.bottom;
 
 var x = d3.scale.ordinal()
     .rangeRoundBands([0, width], .1);
@@ -79,8 +79,7 @@ $.ajax({
     contentType: "application/json",
     dataType: 'jsonp',
     success: function(json) {
-        console.log(json);
-	//var json = JSON.stringify(json)
+        //console.log(json);
 	data = json
         x.domain(data.map(function(d) { return d[0]; }));
 	y.domain([0, d3.max(data, function(d) { return d[1]; })]);
