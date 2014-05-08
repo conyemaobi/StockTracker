@@ -19,32 +19,12 @@
   <script src="js/services.js"></script>
   <script src="js/d3.min.js"></script>
 
-  <style>
-	.bar {
-	fill: steelblue;
-	}
-
-	.axis text {
-	font: 10px sans-serif;
-	}
-
-	.axis path,
-	.axis line {
-	fill: none;
-	stroke: #000;
-	shape-rendering: crispEdges;
-	}
-
-	.x.axis path {
-	display: none;
-	}
-  </style>
-
 </head>
 <body>
-<svg class="chart"></svg>
+<svg class="chart">
+<text x="0" y="0">Stock Mentions</text>
+</svg>
 <script>
-
 var margin = {top: 20, right: 30, bottom: 30, left: 40},
     width = 1600 - margin.left - margin.right,
     height = 750 - margin.top - margin.bottom;
@@ -69,7 +49,6 @@ var chart = d3.select(".chart")
   .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-
 var url = "http://ec2-54-83-155-47.compute-1.amazonaws.com:5000/"
 $.ajax({
     type: 'GET',
@@ -79,7 +58,6 @@ $.ajax({
     contentType: "application/json",
     dataType: 'jsonp',
     success: function(json) {
-        //console.log(json);
 	data = json
         x.domain(data.map(function(d) { return d[0]; }));
 	y.domain([0, d3.max(data, function(d) { return d[1]; })]);
