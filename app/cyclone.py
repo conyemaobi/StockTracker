@@ -8,7 +8,7 @@ import json
 class MainHandler(RequestHandler):
   def get(self):
 	cur = conn.cursor()
-        cur.execute("SELECT stock,count from STOCKS")
+        cur.execute("SELECT stock,count from STOCKS where count > 3 order by stock asc limit 40")
         rows = cur.fetchall()
 	self.write('callback(' + json.dumps(rows) + ')')
         self.set_header('Content-Type', 'application/javascript')
