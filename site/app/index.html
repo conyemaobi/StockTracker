@@ -59,42 +59,6 @@ YAHOO = {
         }
     };
 
-function findName(ticker) {
-	
-
-	YAHOO.Finance.SymbolSuggest.ssCallback = function (data) {
-		if ( !(typeof data.ResultSet.Result[0].name === 'undefined') ) {
-			alert(data.ResultSet.Result[0].name);
-			return data.ResultSet.Result[0].name;
-		}
-        };
-        if (ticker.length > 0) {
-
-		$.ajax({
-			type: "GET",
-			url: "http://d.yimg.com/autoc.finance.yahoo.com/autoc",
-			async: false,
-			data: {
-				query: ticker
-			},
-			dataType: "jsonp",
-			jsonp: "callback",
-			jsonpCallback: "YAHOO.Finance.SymbolSuggest.ssCallback",
-			//jsonpCallback: "callback",
-			/*success: function(json){
-				alert(json.ResultSet.Result[0].name);
-				if ( !(typeof json.ResultSet.Result[0].name === 'undefined') ) {
-					alert(json.ResultSet.Result[0].name);
-					return json.ResultSet.Result[0].name;
-				}
-				//alert (data.ResultSet.Result[0].name);
-				//return data.ResultSet.Result[0].name;
-			}*/
-		});
-	}
-
-}
-
 var url = "http://ec2-54-83-155-47.compute-1.amazonaws.com:5000/"
 $.ajax({
     type: 'GET',
@@ -126,12 +90,35 @@ $.ajax({
 	.attr("height", function(d) { return height - y(d[1]); })
 	.attr("width", x.rangeBand())
 	.on("mouseover", function(d) {
-	    var name = findName(d[0]);
-	    alert(name);
+	     YAHOO.Finance.SymbolSuggest.ssCallback = function (data) {
+		if ( !(typeof data.ResultSet.Result[0].name === 'undefined') ) {
+            		div.transition()        
+                	.duration(200)      
+                	.style("opacity", .9);      
+            		div.html(data.ResultSet.Result[0].name)  
+                	.style("left", (d3.event.pageX) + "px")     
+                	.style("top", (d3.event.pageY - 28) + "px");
+		}
+	     }
+
+	     if (d[0].length > 0) {
+	     	$.ajax({
+	  		type: "GET",
+			url: "http://d.yimg.com/autoc.finance.yahoo.com/autoc",
+			async: false,
+			data: {
+				query: d[0]
+			},
+			dataType: "jsonp",
+			jsonp: "callback",
+			jsonpCallback: "YAHOO.Finance.SymbolSuggest.ssCallback",
+	    	});
+	    }
+
             div.transition()        
                 .duration(200)      
                 .style("opacity", .9);      
-            div .html(name)  
+            div .html("")  
                 .style("left", (d3.event.pageX) + "px")     
                 .style("top", (d3.event.pageY - 28) + "px");
             })                 
