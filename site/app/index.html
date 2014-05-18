@@ -18,6 +18,7 @@
   <script src="js/filters.js"></script>
   <script src="js/services.js"></script>
   <script src="js/d3.min.js"></script>
+  <script src="js/modernizr-latest.js"></script>
 
 </head>
 <body>
@@ -90,38 +91,48 @@ $.ajax({
 	.attr("height", function(d) { return height - y(d[1]); })
 	.attr("width", x.rangeBand())
 	.on("mouseover", function(d) {
-	     YAHOO.Finance.SymbolSuggest.ssCallback = function (data) {
-		if ( !(typeof data.ResultSet.Result[0].name === 'undefined') ) {
-            		div.transition()        
-                	.duration(200)      
-                	.style("opacity", .9);      
-            		div.html(data.ResultSet.Result[0].name)  
-                	.style("left", (d3.event.pageX) + "px")     
-                	.style("top", (d3.event.pageY - 28) + "px");
+
+		if (!window.localStorage[d[0]]) { 	     
+			YAHOO.Finance.SymbolSuggest.ssCallback = function (data) {
+				if ( !(typeof data.ResultSet.Result[0].name === 'undefined') ) {
+					window.localStorage[d[0]] = data.ResultSet.Result[0].name;
+            				div.transition()        
+                			.duration(200)      
+                			.style("opacity", .9);      
+            				div.html(data.ResultSet.Result[0].name)  
+                			.style("left", (d3.event.pageX) + "px")     
+                			.style("top", (d3.event.pageY - 28) + "px");
+				}
+	     		}
+
+			if (d[0].length > 0) {
+	     			$.ajax({
+	  				type: "GET",
+					url: "http://d.yimg.com/autoc.finance.yahoo.com/autoc",
+					async: false,
+					data: {
+						query: d[0]
+					},
+					dataType: "jsonp",
+					jsonp: "callback",
+					jsonpCallback: "YAHOO.Finance.SymbolSuggest.ssCallback",
+	    			});
+			}
+		} 
+
+		var initial = "";
+		if (window.localStorage[d[0]]) {	     
+			initial = window.localStorage[d[0]]; 	     
 		}
-	     }
 
-	     if (d[0].length > 0) {
-	     	$.ajax({
-	  		type: "GET",
-			url: "http://d.yimg.com/autoc.finance.yahoo.com/autoc",
-			async: false,
-			data: {
-				query: d[0]
-			},
-			dataType: "jsonp",
-			jsonp: "callback",
-			jsonpCallback: "YAHOO.Finance.SymbolSuggest.ssCallback",
-	    	});
-	    }
-
-            div.transition()        
-                .duration(200)      
-                .style("opacity", .9);      
-            div .html("")  
+		div.transition()        
+		.duration(200)      
+		.style("opacity", .9);      
+		div.html(initial)  
                 .style("left", (d3.event.pageX) + "px")     
                 .style("top", (d3.event.pageY - 28) + "px");
-            })                 
+
+	})                 
         .on("mouseout", function(d) {       
             div.transition()        
                 .duration(500)      
