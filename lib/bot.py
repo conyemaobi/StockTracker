@@ -9,6 +9,7 @@ import psycopg2
 import urllib2
 import json
 
+ticker_type = ["ETF", "Equity"]
 exchanges = ["NASDAQ", "NYSE"]
 one_letter_words = ["A", "I"]
 
@@ -22,7 +23,7 @@ def is_valid_stock(ticker):
 	html = response.read().lstrip("YAHOO.Finance.SymbolSuggest.ssCallback(").rstrip(")")
 	data = json.loads(html)
 	try:
-		if data["ResultSet"]["Result"][0]["typeDisp"] == "Equity" and data["ResultSet"]["Result"][0]["exchDisp"] in exchanges:
+		if data["ResultSet"]["Result"][0]["typeDisp"] in ticker_type and data["ResultSet"]["Result"][0]["exchDisp"] in exchanges:
 			return True
 		else:
 			return False
@@ -39,15 +40,15 @@ class Bot(irc.IRCClient):
 
     def connectionLost(self, reason):
         irc.IRCClient.connectionLost(self, reason)
-        print 'Lost connection %s' % reason
+        #print 'Lost connection %s' % reason
 
     def signedOn(self):
         self.join(self.factory.channel)
-        print 'Signed On!'
+        #print 'Signed On!'
 
     def joined(self, channel):
         self.channel = channel
-        print 'Joined %s' % channel
+        #print 'Joined %s' % channel
 
     def register(self, nickname, hostname='foo', servername='bar'):
         self.nickname = nickname
@@ -60,14 +61,14 @@ class Bot(irc.IRCClient):
                       (self.username, hostname, servername, self.realname))
 
     def irc_PING(self, prefix, params):
-        print 'Ping --> %s' % params
+        #print 'Ping --> %s' % params
         self.sendLine("PONG %s" % params[-1])
 
     def privmsg(self, user, channel, msg):
         user = user.split('!')[0]
-        print '%s | %s' % (user, msg)
-	#regex = re.compile("[A-Z]+\s\(")
-	regex = re.compile("[A-Z]+\s")
+        #print '%s | %s' % (user, msg)
+	regex = re.compile("[A-Z]+\s\(")
+	#regex = re.compile("[A-Z]+\s")
 	tickers = regex.findall(msg)
 	for t in tickers:
 		t = t.strip('(')
@@ -83,7 +84,7 @@ class Bot(irc.IRCClient):
 				else:
 					cur.execute("INSERT INTO STOCKS (STOCK,COUNT,LAST_MODIFIED) VALUES (\'"+str(t)+"\',1,current_timestamp)");
 					conn.commit()
-				print "Records created successfully";
+				#print "Records created successfully";
 	#conn.close()
 
 class Proto4Bot(ClientFactory):
