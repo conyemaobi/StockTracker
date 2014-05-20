@@ -10,6 +10,7 @@ import urllib2
 import json
 
 exchanges = ["NASDAQ", "NYSE"]
+one_letter_words = ["A", "I"]
 
 # our connection
 cur = conn.cursor()
@@ -65,12 +66,12 @@ class Bot(irc.IRCClient):
     def privmsg(self, user, channel, msg):
         user = user.split('!')[0]
         print '%s | %s' % (user, msg)
-	regex = re.compile("[A-Z]+\s\(")
-	#regex = re.compile("[A-Z]+\s")
+	#regex = re.compile("[A-Z]+\s\(")
+	regex = re.compile("[A-Z]+\s")
 	tickers = regex.findall(msg)
 	for t in tickers:
 		t = t.strip('(')
-		if is_valid_stock(t.replace(" ", "")):
+		if is_valid_stock(t.replace(" ", "")) and not t.replace(" ", "") in one_letter_words:
 			cur.execute("SELECT count(*) from STOCKS where stock=\'"+str(t)+"\'")
 			rows = cur.fetchall()
 			for row in rows:
@@ -84,10 +85,6 @@ class Bot(irc.IRCClient):
 					conn.commit()
 				print "Records created successfully";
 	#conn.close()
-        #answer = response()
-	#answer = t.strip('(')
-	#print '%s | %s' % (self.nickname, answer)
-	#self.msg(channel, answer)			
 
 class Proto4Bot(ClientFactory):
 
