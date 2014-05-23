@@ -3,17 +3,18 @@
 from twisted.internet import reactor
 from twisted.internet.protocol import ClientFactory
 from twisted.words.protocols import irc
-#from bot_response import response
 import re
 import psycopg2
 import urllib2
 import json
+import passwords
 
 ticker_type = ["ETF", "Equity"]
 exchanges = ["NASDAQ", "NYSE"]
 one_letter_words = ["A", "I"]
 
 # our connection
+conn = psycopg2.connect(database=passwords.Live.database, user=passwords.Live.user, password=passwords.Live.password, host=passwords.Live.host, port=passwords.Live.port)
 cur = conn.cursor()
 print "Opened database successfully"
 
