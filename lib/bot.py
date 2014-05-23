@@ -28,7 +28,7 @@ def is_valid_stock(ticker):
 			return True
 		else:
 			return False
-	except IndexError:
+	except Exception as e:
 		pass
 
 class Bot(irc.IRCClient):
