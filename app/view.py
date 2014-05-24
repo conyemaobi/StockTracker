@@ -17,7 +17,7 @@ db = SQLAlchemy(app)
 
 class Mention(db.Model):
         #__tablename__ = 'mention'
-        id = db.Column(db.Integer, primary_key=True)
+        id = db.Column(db.Integer, db.Sequence('mention_id', start=1, increment=1), primary_key=True)
         stock = db.Column(db.String(30), nullable=False)
         #count = Column(Integer, nullable=False)
         current_timestamp = db.Column(TIMESTAMP, nullable=False)
