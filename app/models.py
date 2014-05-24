@@ -3,10 +3,11 @@ from sqlalchemy import create_engine
 from sqlalchemy import Column, Integer, String, DateTime, Boolean
 from sqlalchemy.types import TIMESTAMP, FLOAT
 from sqlalchemy.ext.declarative import declarative_base
+import psycopg2
 import passwords
 
 Base = declarative_base()
-engine = create_engine('psycopg2://'+passwords.Live.username+':'+passwords.Live.password+'@'+passwords.Live.hostname+':5432/'+passwords.Live.db, echo=False)
+engine = create_engine('postgresql+psycopg2://'+passwords.Live.username+':'+passwords.Live.password+'@'+passwords.Live.hostname+':5432/'+passwords.Live.db, echo=False)
 
 class Mention(Base):
 	__tablename__ = 'mention'
