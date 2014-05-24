@@ -8,17 +8,21 @@ import passwords
 Base = declarative_base()
 engine = create_engine('psycopg2://'+passwords.Live.username+':'+passwords.Live.password+'@'+passwords.Live.hostname+':5432/'+passwords.Live.db, echo=False)
 
-class Stocks(Base):
-	__tablename__ = 'stocks'
-	#id = Column(Integer, primary_key=True)
+class Mention(Base):
+	__tablename__ = 'mention'
+	id = Column(Integer, primary_key=True)
 	stock = Column(String(30), nullable=False)
-	count = Column(Integer, nullable=False)
-	last_modified = Column(Timestamp, nullable=False)
+	#count = Column(Integer, nullable=False)
+	current_timestamp = Column(TIMESTAMP, nullable=False)
+	
+	def __init__(self, stock, current_timestamp):
+        	self.stock = stock
+        	self.current_timestamp = current_timestamp
 
-def __repr__(self):
-    return "<Stocks('%s')>" % (self.stock)
+	def __repr__(self):
+		return "<Mention('%s')>" % (self.stock, self.current_timestamp)
 
-stocks_table = Stocks.__table__
+mention_table = Mention.__table__
 metadata = Base.metadata
 
 def create_all():
