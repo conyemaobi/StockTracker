@@ -16,29 +16,27 @@ db = SQLAlchemy(app)
 ##### MODELS #####
 
 class Mention(db.Model):
-        #__tablename__ = 'mention'
         id = db.Column(db.Integer, db.Sequence('mention_id', start=1, increment=1), primary_key=True)
         stock = db.Column(db.String(30), nullable=False)
-        #count = Column(Integer, nullable=False)
-        current_timestamp = db.Column(TIMESTAMP, nullable=False)
+        mention_time = db.Column(TIMESTAMP, nullable=False)
 
-        def __init__(self, stock, current_timestamp):
+        def __init__(self, stock, mention_time):
                 self.stock = stock
-                self.current_timestamp = current_timestamp
+                self.mention_time = mention_time
 
         def __repr__(self):
-                return "<Mention('%s')>" % (self.stock, self.current_timestamp)
+                return "<Mention('%s')>" % (self.stock, self.mention_time)
 
 ##### SERIALIZERS #####
 
 class MentionSerializer(Serializer):
 
     class Meta:
-        fields = ("id", "stock", "current_timestamp")
+        fields = ("id", "stock", "mention_time")
 
 ##### API #####
 
-@app.route('/api')
+@app.route('/api/v1/mentions', methods=["GET"])
 def data():
         #rows = db.query(Mention).with_entities(Mention.stock, func.count(Mention).label('total')).group_by(Mention.stock).order_by('total ASC').limit(40)
 	mentions = Mention.query.all()
