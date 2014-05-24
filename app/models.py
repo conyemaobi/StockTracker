@@ -10,7 +10,7 @@ engine = create_engine('psycopg2://'+passwords.Live.username+':'+passwords.Live.
 
 class Stocks(Base):
 	__tablename__ = 'stocks'
-	id = Column(Integer, primary_key=True)
+	#id = Column(Integer, primary_key=True)
 	stock = Column(String(30), nullable=False)
 	count = Column(Integer, nullable=False)
 	last_modified = Column(Timestamp, nullable=False)
