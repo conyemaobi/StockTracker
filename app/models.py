@@ -1,9 +1,12 @@
 #!python
 from sqlalchemy import create_engine
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, Timestamp
-engine = create_engine('mysql://root:password@localhost/somedb', echo=False)
+from sqlalchemy import Column, Integer, String, DateTime, Boolean
+from sqlalchemy.types import TIMESTAMP, FLOAT
 from sqlalchemy.ext.declarative import declarative_base
+import passwords
+
 Base = declarative_base()
+engine = create_engine('psycopg2://'+passwords.Live.username+':'+passwords.Live.password+'@'+passwords.Live.hostname+':5432/'+passwords.Live.db, echo=False)
 
 class Stocks(Base):
 	__tablename__ = 'stocks'
@@ -15,7 +18,7 @@ class Stocks(Base):
 def __repr__(self):
     return "<Stocks('%s')>" % (self.stock)
 
-users_table = Stocks.__table__
+stocks_table = Stocks.__table__
 metadata = Base.metadata
 
 def create_all():
