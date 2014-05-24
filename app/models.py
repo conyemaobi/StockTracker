@@ -3,6 +3,7 @@ from sqlalchemy import create_engine
 from sqlalchemy import Column, Integer, String, DateTime, Boolean
 from sqlalchemy.types import TIMESTAMP, FLOAT
 from sqlalchemy.ext.declarative import declarative_base
+from marshmallow import Serializer, fields
 import psycopg2
 import passwords
 
@@ -22,6 +23,11 @@ class Mention(Base):
 
 	def __repr__(self):
 		return "<Mention('%s')>" % (self.stock, self.current_timestamp)
+
+class MentionSerializer(Serializer):
+
+    class Meta:
+        fields = ("id", "stock", "current_timestamp")
 
 mention_table = Mention.__table__
 metadata = Base.metadata
