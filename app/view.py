@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, Response
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Column, Integer, String, DateTime, Boolean
 from sqlalchemy.types import TIMESTAMP, FLOAT
@@ -34,10 +34,24 @@ class MentionSerializer(Serializer):
     class Meta:
         fields = ("id", "stock", "mention_time")
 
+class MentionCountSerializer(Serializer):
+
+    class Meta:
+        fields = ('stock', 'total')
+
 ##### API #####
 
 @app.route('/api/v1/mentions', methods=["GET"])
 def data():
-        #rows = db.query(Mention).with_entities(Mention.stock, func.count(Mention).label('total')).group_by(Mention.stock).order_by('total ASC').limit(40)
-	mentions = Mention.query.all()
-	return jsonify({"mentions": MentionSerializer(mentions, many=True).data})
+	serializer = None
+	if request.args.get('function') == "count":
+        	mentions = Mention.query.with_entities(Mention.stock, func.count(Mention.stock).label('total')).group_by(Mention.id).group_by(Mention.stock).order_by("total ASC").limit(40)
+		serializer = MentionCountSerializer(mentions, many=True).data
+	else:
+		mentions = Mention.query.all()
+		serializer = MentionSerializer(mentions, many=True).data
+
+	if request.args.get('output') == "jsonp":
+		return Response('callback('+json.dumps({"mentions": serializer})+')', content_type='application/javascript')
+	else:
+		return jsonify({"mentions": serializer})
