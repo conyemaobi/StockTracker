@@ -1,0 +1,16 @@
+Flask==0.9
+Flask-SQLAlchemy==0.16
+Jinja2==2.6
+SQLAlchemy==0.7.10
+Tempita==0.5.1
+Werkzeug==0.8.3
+config==0.3.9
+decorator==3.4.0
+distribute==0.6.28
+logilab-astng==0.24.2
+logilab-common==0.59.0
+passwords==0.1.0
+pylint==0.27.0
+sqlalchemy-migrate==0.7.2
+wsgiref==0.1.2
+webassets==0.8
