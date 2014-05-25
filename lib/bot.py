@@ -80,8 +80,8 @@ class Bot(irc.IRCClient):
 	#regex = re.compile("[A-Z]+\s")
 	tickers = regex.findall(msg)
 	for t in tickers:
-		t = t.strip('(')
-		if is_valid_stock(t.replace(" ", "")) and not t.replace(" ", "") in one_letter_words:
+		t = t.strip('(').replace(" ", "")
+		if is_valid_stock(t) and not t in one_letter_words:
 			new_mention = Mention(t, func.current_timestamp())
 			session.add(new_mention)
 			session.commit()
