@@ -4,13 +4,8 @@ from twisted.internet import reactor
 from twisted.internet.protocol import ClientFactory
 from twisted.words.protocols import irc
 from sqlalchemy import *
-from sqlalchemy.orm import create_session
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import exc
-from sqlalchemy.sql import text
-from sqlalchemy.types import TIMESTAMP
 from sqlalchemy.sql import func
-from sqlalchemy.schema import Sequence
+from sqlalchemy.orm import sessionmaker
 from view import Mention
 import psycopg2
 import re
@@ -22,19 +17,14 @@ ticker_type = ["ETF", "Equity"]
 exchanges = ["NASDAQ", "NYSE"]
 one_letter_words = ["A", "I"]
 
-# our connection
-Base = declarative_base()
+# our engine
 engine = create_engine('postgresql+psycopg2://'+passwords.Live.username+':'+passwords.Live.password+'@'+passwords.Live.hostname+':5432/'+passwords.Live.db)
-metadata = MetaData(bind=engine)
 
 #Create a session to use the tables
-session = create_session(bind=engine)
+Session = sessionmaker(bind=engine)
+session = Session()
 
 print "Opened database successfully"
-
-#Reflect each database table we need to use, using metadata
-class Mention(Base):
-        __table__ = Table('mention', metadata, autoload=True)
 
 def is_valid_stock(ticker):
 	url = "http://d.yimg.com/autoc.finance.yahoo.com/autoc?query="+str(ticker)+"&callback=YAHOO.Finance.SymbolSuggest.ssCallback"
@@ -59,15 +49,15 @@ class Bot(irc.IRCClient):
 
     def connectionLost(self, reason):
         irc.IRCClient.connectionLost(self, reason)
-        print 'Lost connection %s' % reason
+        #print 'Lost connection %s' % reason
 
     def signedOn(self):
         self.join(self.factory.channel)
-        print 'Signed On!'
+        #print 'Signed On!'
 
     def joined(self, channel):
         self.channel = channel
-        print 'Joined %s' % channel
+        #print 'Joined %s' % channel
 
     def register(self, nickname, hostname='foo', servername='bar'):
         self.nickname = nickname
@@ -80,7 +70,7 @@ class Bot(irc.IRCClient):
                       (self.username, hostname, servername, self.realname))
 
     def irc_PING(self, prefix, params):
-        print 'Ping --> %s' % params
+        #print 'Ping --> %s' % params
         self.sendLine("PONG %s" % params[-1])
 
     def privmsg(self, user, channel, msg):
@@ -92,22 +82,10 @@ class Bot(irc.IRCClient):
 	for t in tickers:
 		t = t.strip('(')
 		if is_valid_stock(t.replace(" ", "")) and not t.replace(" ", "") in one_letter_words:
-			new_mention = Mention(str(t), 'current_timestamp')
+			new_mention = Mention(t, func.current_timestamp())
 			session.add(new_mention)
 			session.commit()
-			#cur.execute("SELECT count(*) from STOCKS where stock=\'"+str(t)+"\'")
-			#rows = cur.fetchall()
-			#for row in rows:
-			#	if int(row[0]) > 0:
-			#		cur.execute("UPDATE STOCKS SET count = count + 1 WHERE stock =\'"+str(t)+"\'")
-			#		conn.commit()
-			#		cur.execute("UPDATE STOCKS SET last_modified = current_timestamp WHERE stock =\'"+str(t)+"\'")
-			#		conn.commit()
-			#	else:
-			#		cur.execute("INSERT INTO STOCKS (STOCK,COUNT,LAST_MODIFIED) VALUES (\'"+str(t)+"\',1,current_timestamp)");
-			#		conn.commit()
-			print "Records created successfully";
-	#conn.close()
+			#print "Records created successfully";
 
 class Proto4Bot(ClientFactory):
 
