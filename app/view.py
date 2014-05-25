@@ -8,6 +8,7 @@ from marshmallow import Serializer, fields
 import psycopg2
 import json
 import passwords
+from collections import OrderedDict
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = 'postgresql+psycopg2://'+passwords.Live.username+':'+passwords.Live.password+'@'+passwords.Live.hostname+':5432/'+passwords.Live.db
@@ -45,8 +46,8 @@ class MentionCountSerializer(Serializer):
 def data():
 	serializer = None
 	if request.args.get('function') == "count":
-        	mentions = Mention.query.with_entities(Mention.stock, func.count(Mention.stock).label('total')).group_by(Mention.id).group_by(Mention.stock).order_by("total ASC").limit(40)
-		serializer = MentionCountSerializer(mentions, many=True).data
+		mentions = db.engine.execute("select stock, count(*) as mention_total from mention group by stock order by mention_total asc limit 40").fetchall()
+		serializer = [{"stock" : i[0], "mention_count" : i[1]} for i in mentions]
 	else:
 		mentions = Mention.query.all()
 		serializer = MentionSerializer(mentions, many=True).data
