@@ -60,7 +60,7 @@ YAHOO = {
         }
     };
 
-var url = "http://ec2-54-83-155-47.compute-1.amazonaws.com:5000/"
+var url = "http://ec2-54-83-155-47.compute-1.amazonaws.com:5000/api/v1/mentions?output=jsonp&function=count"
 $.ajax({
     type: 'GET',
     url: url,
@@ -69,9 +69,9 @@ $.ajax({
     contentType: "application/json",
     dataType: 'jsonp',
     success: function(json) {
-	data = json
-        x.domain(data.map(function(d) { return d[0]; }));
-	y.domain([0, d3.max(data, function(d) { return d[1]; })]);
+	data = json.mentions
+        x.domain(data.map(function(d) { return d.stock; }));
+	y.domain([0, d3.max(data, function(d) { return d.mention_count; })]);
 
 	chart.append("g")
       	.attr("class", "x axis")
@@ -86,16 +86,16 @@ $.ajax({
 	.data(data)
 	.enter().append("rect")
 	.attr("class", "bar")
-	.attr("x", function(d) { return x(d[0]); })
-	.attr("y", function(d) { return y(d[1]); })
-	.attr("height", function(d) { return height - y(d[1]); })
+	.attr("x", function(d) { return x(d.stock); })
+	.attr("y", function(d) { return y(d.mention_count); })
+	.attr("height", function(d) { return height - y(d.mention_count); })
 	.attr("width", x.rangeBand())
 	.on("mouseover", function(d) {
 
-		if (!window.localStorage[d[0]]) { 	     
+		if (!window.localStorage[d.stock]) { 	     
 			YAHOO.Finance.SymbolSuggest.ssCallback = function (data) {
 				if ( !(typeof data.ResultSet.Result[0].name === 'undefined') ) {
-					window.localStorage[d[0]] = data.ResultSet.Result[0].name;
+					window.localStorage[d.stock] = data.ResultSet.Result[0].name;
             				div.transition()        
                 			.duration(200)      
                 			.style("opacity", .9);      
@@ -104,13 +104,13 @@ $.ajax({
                 			.style("top", (d3.event.pageY - 28) + "px");
 				}
 	     		}
-			if (d[0].length > 0) {
+			if (d.stock.length > 0) {
 	     			$.ajax({
 	  				type: "GET",
 					url: "http://d.yimg.com/autoc.finance.yahoo.com/autoc",
 					async: false,
 					data: {
-						query: d[0]
+						query: d.stock
 					},
 					dataType: "jsonp",
 					jsonp: "callback",
@@ -120,8 +120,8 @@ $.ajax({
 		} 
 
 		var initial = "";
-		if (window.localStorage[d[0]]) {	     
-			initial = window.localStorage[d[0]]; 	     
+		if (window.localStorage[d.stock]) {	     
+			initial = window.localStorage[d.stock]; 	     
 		}
 
 		div.transition()        
@@ -145,7 +145,7 @@ $.ajax({
 });
 
 function type(d) {
-  d[1] = +d[1]; // coerce to number
+  d.mention_count = +d.mention_count; // coerce to number
   return d;
 }
 </script>
