@@ -1,63 +1,57 @@
 <!doctype html>
-<html lang="en" ng-app="phonecatApp">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <title>Daily Treasury Yield Curve Rates</title>
-  <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css">
-  <link rel="stylesheet" href="css/app.css">
-  <link rel="stylesheet" href="css/animations.css">
 
   <script src="bower_components/jquery/jquery.js"></script>
-  <script src="bower_components/angular/angular.js"></script>
-  <script src="bower_components/angular-animate/angular-animate.js"></script>
-  <script src="bower_components/angular-route/angular-route.js"></script>
-  <script src="bower_components/angular-resource/angular-resource.js"></script>
-  <script src="js/app.js"></script>
-  <script src="js/animations.js"></script>
-  <script src="js/controllers.js"></script>
-  <script src="js/filters.js"></script>
-  <script src="js/services.js"></script>
   <script src="js/d3.min.js"></script>
   <script src="js/modernizr-latest.js"></script>
 
+  <style type="text/css">
+	.chart div {
+   	font: 10px sans-serif;
+   	background-color: steelblue;
+   	text-align: right;
+   	padding: 3px;
+   	margin: 1px;
+   	color: white;
+ 	}
+  </style>
 </head>
 <body>
-<svg class="chart">
-<text x="0" y="0">Daily Treasury Yield Curve Rates</text>
-</svg>
+<div id="chart" class="chart"></div>
 <script>
-d3.xml("http://data.treasury.gov/feed.svc/DailyTreasuryYieldCurveRateData?$filter=month(NEW_DATE)%20eq%205%20and%20year(NEW_DATE)%20eq%202014", "application/xml", function(xml) {
-	var runners = d3.select(xml).selectAll("entry")[0][0];
-	var content = runners.selectAll("content");
-	debugger;
-	//var chart = d3.select("#chart");
-	//var content = runners.selectAll("content")[0];
-	//console.log(runners);
+// Create the XHR object.
+function createCORSRequest(method, url) {
+  var xhr = new XMLHttpRequest();
+  if ("withCredentials" in xhr) {
+    // XHR for Chrome/Firefox/Opera/Safari.
+    xhr.open(method, url, true);
+  } else if (typeof XDomainRequest != "undefined") {
+    // XDomainRequest for IE.
+    xhr = new XDomainRequest();
+    xhr.open(method, url);
+  } else {
+    // CORS not supported.
+    xhr = null;
+  }
+  return xhr;
+}
 
-	//var tr = table.selectAll("tr")
-	//.data(runners)
-	//.enter().append("tr");
+d3.xml("http://data.treasury.gov/feed.svc/DailyTreasuryYieldCurveRateData?$filter=month(NEW_DATE)%20eq%205%20and%20year(NEW_DATE)%20eq%202014", "application/xml")
+.header("Access-Control-Allow-Origin", "http://ec2-54-83-155-47.compute-1.amazonaws.com:8000")
+.get(function(xml) {
 
-	/*chart.selectAll("div")
-	.data(function(runners) {
-		console.log(runners);
-		var content = d3.select(runnners).select("content")[0];
-		console.log(content);
-		return d3.select(runners).select("content")[0];
-	})
-	.enter().append("div")
-    	.text(function(d) {
-      		return d.textContent;
-    	});*/
+	var entry = d3.select(xml).selectAll("entry")[0];
+	d3.select("#chart")
+	.selectAll("div")
+    	.data(entry)
+    	.enter().append("div")
+		.style("width", function(d) { return parseFloat(d3.select(d).select("content")[0][0].firstElementChild.childNodes[21].innerHTML) * 10 + "px"; })
+		.text(function(d) { return d3.select(d).select("content")[0][0].firstElementChild.childNodes[21].innerHTML; });
 
-	//console.log(runners);
-  /*d3.select("#chart")
-    .selectAll("div")
-    .data(d3.select(xml).selectAll("d:BC_10YEAR"))
-    .enter().append("div")
-      .style("width", function(d) { return d.textContent * 10 + "px"; })
-      .text(function(d) { return d.textContent; });*/
-}).header("Access-Control-Allow-Origin" ,"http://ec2-54-83-155-47.compute-1.amazonaws.com:8000");
+});
 </script>
 
 </body>
