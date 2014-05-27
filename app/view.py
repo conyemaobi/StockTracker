@@ -46,7 +46,7 @@ class MentionCountSerializer(Serializer):
 def data():
 	serializer = None
 	if request.args.get('function') == "count":
-		mentions = db.engine.execute("select stock, count(*) as mention_total from mention group by stock order by mention_total asc limit 40").fetchall()
+		mentions = db.engine.execute("select * from (select stock, count(*) as mention_total from mention where mention_time > DATE(NOW() - '0 day'::INTERVAL) group by stock order by mention_total desc limit 40) as A order by stock asc").fetchall()
 		serializer = [{"stock" : i[0], "mention_count" : i[1]} for i in mentions]
 	else:
 		mentions = Mention.query.all()
