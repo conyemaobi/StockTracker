@@ -40,59 +40,58 @@ def is_valid_stock(ticker):
 		pass
 
 class Bot(irc.IRCClient):
-    nickname = raw_input('Name your bot: ')
-    realname = raw_input('Enter your name: ')
+	nickname = raw_input('Name your bot: ')
+	realname = raw_input('Enter your name: ')
 
-    def connectionMade(self):
-        irc.IRCClient.connectionMade(self)     
-        print '\nConnected!'
+	def connectionMade(self):
+		irc.IRCClient.connectionMade(self)
+		print '\nConnected!'
 
-    def connectionLost(self, reason):
-        irc.IRCClient.connectionLost(self, reason)
-        #print 'Lost connection %s' % reason
+	def connectionLost(self, reason):
+		irc.IRCClient.connectionLost(self, reason)
+		#print 'Lost connection %s' % reason
 
-    def signedOn(self):
-        self.join(self.factory.channel)
-        #print 'Signed On!'
+	def signedOn(self):
+		self.join(self.factory.channel)
+		#print 'Signed On!'
 
-    def joined(self, channel):
-        self.channel = channel
-        #print 'Joined %s' % channel
+	def joined(self, channel):
+		self.channel = channel
+		#print 'Joined %s' % channel
 
-    def register(self, nickname, hostname='foo', servername='bar'):
-        self.nickname = nickname
-        if self.password is not None:
-            self.sendLine("PASS %s" % self.password)
-        self.setNick(nickname)
-        if self.username is None:
-            self.username = nickname
-        self.sendLine("USER %s %s %s :%s" % 
-                      (self.username, hostname, servername, self.realname))
+	def register(self, nickname, hostname='foo', servername='bar'):
+		self.nickname = nickname
+		if self.password is not None:
+			self.sendLine("PASS %s" % self.password)
+		self.setNick(nickname)
+		if self.username is None:
+			self.username = nickname
+		 self.sendLine("USER %s %s %s :%s" % 
+			(self.username, hostname, servername, self.realname))
 
-    def irc_PING(self, prefix, params):
-        #print 'Ping --> %s' % params
-        self.sendLine("PONG %s" % params[-1])
+	def irc_PING(self, prefix, params):
+		#print 'Ping --> %s' % params
+		self.sendLine("PONG %s" % params[-1])
 
-    def privmsg(self, user, channel, msg):
-        user = user.split('!')[0]
-        #print '%s | %s' % (user, msg)
-	regex = re.compile("[A-Z]+\s\(")
-	#regex = re.compile("[A-Z]+\s")
-	tickers = regex.findall(msg)
-	for t in tickers:
-		t = t.strip('(').replace(" ", "")
-		if is_valid_stock(t) and not t in one_letter_words:
-			new_mention = Mention(t, func.current_timestamp())
-			session.add(new_mention)
-			session.commit()
-			#print "Records created successfully";
+	def privmsg(self, user, channel, msg):
+		user = user.split('!')[0]
+		#print '%s | %s' % (user, msg)
+		#regex = re.compile("[A-Z]+\s\(")
+		regex = re.compile("[A-Z]+\s")
+		tickers = regex.findall(msg)
+		for t in tickers:
+			t = t.strip('(').replace(" ", "")
+			if is_valid_stock(t) and not t in one_letter_words:
+				new_mention = Mention(t, func.current_timestamp())
+				session.add(new_mention)
+				session.commit()
+				#print "Records created successfully";
 
 class Proto4Bot(ClientFactory):
 
-    def __init__(self):
-        self.channel = '#' + raw_input('Channel: ')
-        self.protocol = Bot
+	def __init__(self):
+		self.channel = '#' + raw_input('Channel: ')
+		self.protocol = Bot
 
-    def clientConnectionLost(self, connector, reason):
-        connector.connect()
-
+	def clientConnectionLost(self, connector, reason):
+		connector.connect()
