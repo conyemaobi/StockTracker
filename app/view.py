@@ -14,6 +14,8 @@ app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = 'postgresql+psycopg2://'+passwords.Live.username+':'+passwords.Live.password+'@'+passwords.Live.hostname+':5432/'+passwords.Live.db
 db = SQLAlchemy(app)
 
+##### AUX FUNCTIONS #####
+
 ##### MODELS #####
 
 class Mention(db.Model):
@@ -43,7 +45,7 @@ class MentionCountSerializer(Serializer):
 ##### API #####
 
 @app.route('/api/v1/mentions', methods=["GET"])
-def data():
+def mentions():
 	serializer = None
 	if request.args.get('function') == "count":
 		mentions = db.engine.execute("select * from (select stock, count(*) as mention_total from mention where mention_time > DATE(NOW() - '0 day'::INTERVAL) group by stock order by mention_total desc limit 40) as A order by stock asc").fetchall()
@@ -56,3 +58,15 @@ def data():
 		return Response('callback('+json.dumps({"mentions": serializer})+')', content_type='application/javascript')
 	else:
 		return jsonify({"mentions": serializer})
+
+#def create_output_type(output):
+@app.route('/api/v1/yield', methods=["GET"])
+def byield():
+
+	serializer = None
+
+	if request.args.get('output') == "jsonp":
+		return Response('callback('+json.dumps({"mentions": serializer})+')', content_type='application/javascript')
+	else:
+		return jsonify({"mentions": serializer})
+
