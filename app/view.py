@@ -5,6 +5,7 @@ from sqlalchemy.types import TIMESTAMP, FLOAT
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.sql import func
 from marshmallow import Serializer, fields
+from twython import Twython, TwythonError
 import psycopg2
 import json
 import passwords
@@ -73,6 +74,26 @@ def byield():
 
 @app.route('/api/v1/twitter', methods=["GET"])
 def twitter():
+
+	twitter = Twython(passwords.Live.twitter_app_key, passwords.Live.twitter_app_secret, oauth_version=2)
+	access_token = twitter.obtain_access_token()
+	twitter = Twython(passwords.Live.twitter_app_key, access_token=access_token)
+
+	search_results = None
+	try:
+		search_results = twitter.search(q='$'+request.args.get('symbol'), result_type='popular')
+	except TwythonError as e:
+		print e
+
+	tweets = [{"id" : i+1, "username" : search_results['statuses'][i]['user']['screen_name'].encode('utf-8'), "tweet" : search_results['statuses'][i]['text'].encode('utf-8'), "created_at" : search_results['statuses'][i]['created_at']} for i in range(len(search_results['statuses']))]
+	
+	if request.args.get('output') == "jsonp":
+		return Response('callback('+json.dumps({"mentions": tweets})+')', content_type='application/javascript')
+	else:
+		return jsonify({"mentions": tweets})
+
+@app.route('/api/v1/stocktwits', methods=["GET"])
+def stocktwits():
 
 	twitter_data = urllib2.urlopen("https://api.stocktwits.com/api/2/streams/symbol/"+request.args.get('symbol')+".json").read()
 	json_data = cjson.decode(twitter_data)
