@@ -9,6 +9,8 @@ import psycopg2
 import json
 import passwords
 from collections import OrderedDict
+import urllib2
+import cjson
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = 'postgresql+psycopg2://'+passwords.Live.username+':'+passwords.Live.password+'@'+passwords.Live.hostname+':5432/'+passwords.Live.db
@@ -59,7 +61,6 @@ def mentions():
 	else:
 		return jsonify({"mentions": serializer})
 
-#def create_output_type(output):
 @app.route('/api/v1/yield', methods=["GET"])
 def byield():
 
@@ -69,4 +70,16 @@ def byield():
 		return Response('callback('+json.dumps({"mentions": serializer})+')', content_type='application/javascript')
 	else:
 		return jsonify({"mentions": serializer})
+
+@app.route('/api/v1/twitter', methods=["GET"])
+def twitter():
+
+	twitter_data = urllib2.urlopen("https://api.stocktwits.com/api/2/streams/symbol/"+request.args.get('symbol')+".json").read()
+	json_data = cjson.decode(twitter_data)
+	tweets = [{"id" : i+1, "tweet" : json_data["messages"][i]["body"]} for i in range(len(json_data["messages"]))]
+
+	if request.args.get('output') == "jsonp":
+		return Response('callback('+json.dumps({"twitter": tweets})+')', content_type='application/javascript')
+	else:
+		return jsonify({"twitter": tweets})
 
