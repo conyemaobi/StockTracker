@@ -6,6 +6,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.sql import func
 from marshmallow import Serializer, fields
 from twython import Twython, TwythonError
+from alchemyapi import AlchemyAPI
 import psycopg2
 import json
 import passwords
@@ -104,3 +105,39 @@ def stocktwits():
 	else:
 		return jsonify({"stocktwits": twits})
 
+@app.route('/api/v1/sentiment', methods=["GET"])
+def sentiment():
+
+	twitter = Twython(passwords.Live.twitter_app_key, passwords.Live.twitter_app_secret, oauth_version=2)
+	access_token = twitter.obtain_access_token()
+	twitter = Twython(passwords.Live.twitter_app_key, access_token=access_token)
+	
+	search_results = None
+	try:
+		search_results = twitter.search(q='$'+request.args.get('symbol'), result_type='popular')
+	except TwythonError as e:
+		print e
+
+	twitter_corpus = ""
+	for tweets in search_results['statuses']:
+		twitter_corpus += tweets['text'].encode('utf-8')
+
+	response = alchemyapi.sentiment_targeted('text',twitter_corpus, '$'+request.args.get('symbol'))
+
+	if response['status'] == 'OK':
+        	print('## Response Object ##')
+        	print(json.dumps(response, indent=4))
+
+        	print('')
+        	print('## Targeted Sentiment ##')
+        	print('type: ', response['docSentiment']['type'])
+
+	if 'score' in response['docSentiment']:
+		print('score: ', response['docSentiment']['score'])
+	else:
+		print('Error in targeted sentiment analysis call: ', response['statusInfo'])	
+
+	if request.args.get('output') == "jsonp":
+		return Response('callback('+json.dumps({"stocktwits": twits})+')', content_type='application/javascript')
+	else:
+		return jsonify({"stocktwits": twits})
