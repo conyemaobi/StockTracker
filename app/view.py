@@ -88,19 +88,19 @@ def twitter():
 	tweets = [{"id" : i+1, "username" : search_results['statuses'][i]['user']['screen_name'].encode('utf-8'), "tweet" : search_results['statuses'][i]['text'].encode('utf-8'), "created_at" : search_results['statuses'][i]['created_at']} for i in range(len(search_results['statuses']))]
 	
 	if request.args.get('output') == "jsonp":
-		return Response('callback('+json.dumps({"mentions": tweets})+')', content_type='application/javascript')
+		return Response('callback('+json.dumps({"twitter": tweets})+')', content_type='application/javascript')
 	else:
-		return jsonify({"mentions": tweets})
+		return jsonify({"twitter": tweets})
 
 @app.route('/api/v1/stocktwits', methods=["GET"])
 def stocktwits():
 
-	twitter_data = urllib2.urlopen("https://api.stocktwits.com/api/2/streams/symbol/"+request.args.get('symbol')+".json").read()
-	json_data = cjson.decode(twitter_data)
-	tweets = [{"id" : i+1, "tweet" : json_data["messages"][i]["body"]} for i in range(len(json_data["messages"]))]
+	stocktwit_data = urllib2.urlopen("https://api.stocktwits.com/api/2/streams/symbol/"+request.args.get('symbol')+".json").read()
+	json_data = cjson.decode(stocktwit_data)
+	twits = [{"id" : i+1, "username" : json_data["messages"][i]["user"]["username"], "twit" : json_data["messages"][i]["body"], "created_at" : json_data["messages"][i]['created_at']} for i in range(len(json_data["messages"]))]
 
 	if request.args.get('output') == "jsonp":
-		return Response('callback('+json.dumps({"twitter": tweets})+')', content_type='application/javascript')
+		return Response('callback('+json.dumps({"stocktwits": twits})+')', content_type='application/javascript')
 	else:
-		return jsonify({"twitter": tweets})
+		return jsonify({"stocktwits": twits})
 
