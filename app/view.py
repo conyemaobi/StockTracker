@@ -122,22 +122,15 @@ def sentiment():
 	for tweets in search_results['statuses']:
 		twitter_corpus += tweets['text'].encode('utf-8')
 
-	response = alchemyapi.sentiment_targeted('text',twitter_corpus, '$'+request.args.get('symbol'))
+	#Create the AlchemyAPI Object
+	alchemyapi = AlchemyAPI()
+	response = alchemyapi.sentiment('text',twitter_corpus)
 
+	sentiment = None
 	if response['status'] == 'OK':
-        	print('## Response Object ##')
-        	print(json.dumps(response, indent=4))
-
-        	print('')
-        	print('## Targeted Sentiment ##')
-        	print('type: ', response['docSentiment']['type'])
-
-	if 'score' in response['docSentiment']:
-		print('score: ', response['docSentiment']['score'])
-	else:
-		print('Error in targeted sentiment analysis call: ', response['statusInfo'])	
+		sentiment = {"sentiment" : response['docSentiment']['type']}
 
 	if request.args.get('output') == "jsonp":
-		return Response('callback('+json.dumps({"stocktwits": twits})+')', content_type='application/javascript')
+		return Response('callback('+json.dumps(sentiment)+')', content_type='application/javascript')
 	else:
-		return jsonify({"stocktwits": twits})
+		return jsonify(sentiment)
